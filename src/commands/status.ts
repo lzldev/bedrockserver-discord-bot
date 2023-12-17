@@ -1,18 +1,37 @@
 import type { ChatInputCommandInteraction } from 'discord.js'
-import { SlashCommandBuilder } from 'discord.js'
-import { ping } from 'bedrock-protocol'
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  SlashCommandBuilder,
+} from 'discord.js'
+import { ServerAdvertisement, ping } from 'bedrock-protocol'
 
 const data = new SlashCommandBuilder()
   .setName('status')
   .setDescription('Fetches server status')
 
 async function execute(interaction: ChatInputCommandInteraction) {
+  const bedrockHost = process.env['BEDROCK_HOST']!
+  const bedrockPort = parseInt(process.env['BEDROCK_PORT']!)
   const status = await ping({
-    host: process.env['BEDROCK_HOST']!,
-    port: process.env['BEDROCK_PORT']! as any as number,
+    host: bedrockHost,
+    port: bedrockPort,
   })
 
-  interaction.reply(`Server Status:\n${JSON.stringify(status)}`)
+  const message = (status: ServerAdvertisement) =>
+    `Server Status:
+  ${status.motd}
+  Players:${status.playersOnline}/${status.playersMax}
+  Version:\`${status.version}\`
+  IP:\`${bedrockHost}:${bedrockPort}\`
+`
+
+  /// # Minecraft launch intents: https://gist.github.com/lukeeey/8d0fd2c0b4a31d64cc9b47f6c1286330
+
+  await interaction.reply({
+    content: message(status),
+  })
 }
 
 const StatusCommand = { data, execute }
