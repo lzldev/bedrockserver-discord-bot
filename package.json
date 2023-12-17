@@ -23,6 +23,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "bedrock-protocol": "^3.33.0",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1"
   },

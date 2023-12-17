@@ -81,11 +81,12 @@ console.log(`Command GUILD IDS ${guildIds}`)
     const clientId = process.env['APP_ID']!
     const gid = String(guildId)
 
-    const data = (await rest
-      .put(Routes.applicationGuildCommands(clientId, gid), {
+    const data = (await rest.put(
+      Routes.applicationGuildCommands(clientId, gid),
+      {
         body: parsedCommands,
-      })
-      .catch(console.error)) as any
+      },
+    )) as any[]
 
     if (!data) {
       console.error(data)

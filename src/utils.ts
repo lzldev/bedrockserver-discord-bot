@@ -4,6 +4,8 @@ const envVars = [
   'PUBLIC_KEY',
   'GUILD_IDS',
   'CHANNEL_IDS',
+  'BEDROCK_HOST',
+  'BEDROCK_PORT',
 ] as const
 export const validateEnv = () => {
   envVars.forEach((varName) => {
