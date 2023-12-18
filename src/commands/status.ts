@@ -1,4 +1,7 @@
-import type { ChatInputCommandInteraction } from 'discord.js'
+import type {
+  ChatInputCommandInteraction,
+  InteractionResponse,
+} from 'discord.js'
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -32,6 +35,8 @@ const awsStopCommand = new StopInstancesCommand({
   InstanceIds: [process.env['AWS_INSTANCE_ID']!],
 })
 
+const deleteResponse = (res: InteractionResponse) => res.delete()
+
 const data = new SlashCommandBuilder()
   .setName('status')
   .setDescription('Fetches server status')
@@ -60,14 +65,26 @@ async function execute(interaction: ChatInputCommandInteraction) {
       components: [row as any],
     })
 
-    const response = await reply.awaitMessageComponent({
-      time: 1000 * 30, // 30s
-    })
+    const response = await reply
+      .awaitMessageComponent({
+        time: 1000 * 30, // 30s
+      })
+      .catch(() => deleteResponse(reply))
 
-    console.log(response)
+    if (!response) {
+      return
+    }
 
     if (response.customId === 'start_server') {
       const cmd = await awsClient.send(awsStartCommand)
+
+      const r2 = await response.reply('ServerStating')
+
+      const rr2 = r2.awaitMessageComponent({
+        time: 1000 * 5, // 30s
+      })
+      rr2.then(() => deleteResponse(r2)).catch(() => deleteResponse(r2))
+
       console.log(cmd)
     }
 
@@ -76,6 +93,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
     return
   } else if (firstContainer.InstanceStatus?.Status !== 'ok') {
     interaction.reply('Container Starting...')
+    return
   }
 
   const bedrockHost = process.env['BEDROCK_HOST']!
@@ -103,8 +121,6 @@ async function execute(interaction: ChatInputCommandInteraction) {
   IP: \`${bedrockHost}:${bedrockPort}\`
 `
 
-  /// # Minecraft launch intents: https://gist.github.com/lukeeey/8d0fd2c0b4a31d64cc9b47f6c1286330
-
   if (status.playersOnline !== 0) {
     const res = await interaction.reply({
       content: message(status),
@@ -114,12 +130,8 @@ async function execute(interaction: ChatInputCommandInteraction) {
       .awaitMessageComponent({
         time: 1000 * 5,
       })
-      .then(async () => {
-        await res.delete()
-      })
-      .catch(async () => {
-        await res.delete()
-      })
+      .then(() => deleteResponse(res))
+      .catch(() => deleteResponse(res))
 
     return
   }
@@ -143,20 +155,14 @@ async function execute(interaction: ChatInputCommandInteraction) {
     .then(async (iter) => {
       if (iter.customId === 'stop_server') {
         await awsClient.send(awsStopCommand)
-        interaction.reply('Server Stopped')
+        iter.reply('Server Stopped').then((stop_res) => {
+          deleteResponse(stop_res)
+        })
       }
 
-      await res
-        .delete()
-        .then(() => console.log('message Deleted'))
-        .catch((e) => console.log)
+      deleteResponse(res)
     })
-    .catch(async (e) => {
-      await res
-        .delete()
-        .then(() => console.log('message Deleted'))
-        .catch((e) => console.log)
-    })
+    .catch(() => deleteResponse(res))
 }
 
 const StatusCommand = { data, execute }
