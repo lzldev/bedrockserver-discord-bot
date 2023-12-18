@@ -6,13 +6,10 @@ const data = new SlashCommandBuilder()
   .setDescription('Clear channel messages.')
 
 async function execute(interaction: ChatInputCommandInteraction) {
-  const messages = await interaction.channel
-    ?.awaitMessages({
-      max: 5,
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+  const messages = await interaction.channel?.awaitMessages().catch((error) => {
+    console.error(error)
+  })
+
   if (!messages) {
     interaction.reply('Error')
     throw new Error('No messages found.')

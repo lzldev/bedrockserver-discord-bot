@@ -6,7 +6,12 @@ const envVars = [
   'CHANNEL_IDS',
   'BEDROCK_HOST',
   'BEDROCK_PORT',
+  'AWS_REGION',
+  'AWS_INSTANCE_ID',
+  'AWS_ACCESS_KEY_ID',
+  'AWS_SECRET_ACCESS_KEY',
 ] as const
+
 export const validateEnv = () => {
   envVars.forEach((varName) => {
     if (typeof process.env[varName] === 'undefined') {
