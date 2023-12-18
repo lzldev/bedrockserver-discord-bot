@@ -27,10 +27,9 @@ async function execute(interaction: ChatInputCommandInteraction) {
   IP:\`${bedrockHost}:${bedrockPort}\`
 `
 
-  /// # Minecraft launch intents: https://gist.github.com/lukeeey/8d0fd2c0b4a31d64cc9b47f6c1286330
-
   await interaction.reply({
     content: message(status),
+    ephemeral: true,
   })
 }
 

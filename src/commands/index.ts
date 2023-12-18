@@ -1,7 +1,6 @@
 import { StatusCommand } from './status'
-import { ClearCommand } from './clear'
 
-const _commandsArr = [StatusCommand, ClearCommand] satisfies ChuuCommand[]
+const _commandsArr = [StatusCommand] satisfies ChuuCommand[]
 
 const commands = new Map<string, ChuuCommand>()
 
